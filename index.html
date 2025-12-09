@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mancala JS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Mancala</h1>
+      <div id="turnIndicator" class="turn-indicator">Red turn</div>
+    </header>
+
+    <section class="board">
+      <div class="store store-blue">
+        <div class="store-label">Blue Store</div>
+        <div id="blueStore" class="store-count">0</div>
+      </div>
+
+      <div class="pit-area">
+        <div id="topRow" class="pit-row pit-row-top"></div>
+        <div id="bottomRow" class="pit-row pit-row-bottom"></div>
+      </div>
+
+      <div class="store store-red">
+        <div class="store-label">Red Store</div>
+        <div id="redStore" class="store-count">0</div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <button id="confirmMove" class="confirm" disabled>Confirm</button>
+      <div id="message" class="message"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
