@@ -1,9 +1,9 @@
 (() => {
-  const BLUE_STORE = 0;
-  const RED_STORE = 13;
-  const BLUE_PITS = [1, 2, 3, 4, 5, 6];
-  const RED_PITS = [7, 8, 9, 10, 11, 12];
-  const INITIAL_SEEDS_PER_PIT = 3;
+  const RED_PITS = [0, 1, 2, 3, 4, 5];
+  const RED_STORE = 6;
+  const BLUE_PITS = [7, 8, 9, 10, 11, 12];
+  const BLUE_STORE = 13;
+  const INITIAL_SEEDS_PER_PIT = 4;
 
   const turnIndicator = document.getElementById("turnIndicator");
   const messageEl = document.getElementById("message");
@@ -38,8 +38,10 @@
     topRow.innerHTML = "";
     bottomRow.innerHTML = "";
 
-    // Top row shows blue pits right-to-left visually, so we add them in reverse order:
-    // leftmost = index 6, ..., rightmost = index 1.
+    // Top row shows blue pits:
+    // We want visually Left->Right to be indices 12, 11, 10, 9, 8, 7.
+    // This way, moving "counter-clockwise" (increasing index) goes 7->8...->12->13(BlueStore).
+    // So we render 12..7 in the DOM for LTR display.
     [...BLUE_PITS].reverse().forEach((idx) => {
       const pit = createPitElement(idx, "blue");
       topRow.appendChild(pit);
