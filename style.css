@@ -28,6 +28,35 @@ body {
   letter-spacing: 0.5px;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.restart {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #c5ced8;
+  background: #ffffff;
+  color: #2f3a4b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.1s ease, box-shadow 0.1s ease, transform 0.08s ease;
+}
+
+.restart:hover {
+  background: #f1f4f9;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.restart:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
 .turn-indicator {
   padding: 10px 16px;
   border: 2px solid #1f1f1f;

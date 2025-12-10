@@ -8,6 +8,7 @@
   const turnIndicator = document.getElementById("turnIndicator");
   const messageEl = document.getElementById("message");
   const confirmBtn = document.getElementById("confirmMove");
+  const restartBtn = document.getElementById("restartGame");
   const topRow = document.getElementById("topRow");
   const bottomRow = document.getElementById("bottomRow");
   const blueStoreEl = document.getElementById("blueStore");
@@ -215,6 +216,7 @@
   }
 
   confirmBtn.addEventListener("click", confirmMove);
+  restartBtn.addEventListener("click", initGame);
   document.addEventListener("keydown", (evt) => {
     if (evt.key.toLowerCase() === "enter" && !confirmBtn.disabled) {
       confirmMove();
