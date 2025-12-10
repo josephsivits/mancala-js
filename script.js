@@ -104,16 +104,22 @@
     if (index === ownStore) {
       setMessage("Free turn! Go again.");
     } else if (isPlayersPit(index, state.currentPlayer) && state.pits[index] === 1) {
-      const opposite = 13 - index;
+      // Opposite index for 0-5 (Red) vs 7-12 (Blue) mapping: sum is 12 (0+12, 5+7).
+      const opposite = 12 - index;
       const captured = state.pits[opposite];
+      
+      // Capture Rule: If last stone lands in empty pit on your side,
+      // take that stone + any opponent stones (even if 0) to your store.
+      state.pits[ownStore] += captured + 1;
+      state.pits[index] = 0;
+      state.pits[opposite] = 0;
+      
       if (captured > 0) {
-        state.pits[ownStore] += captured + 1;
-        state.pits[index] = 0;
-        state.pits[opposite] = 0;
         setMessage("Capture! Stones moved to your store.");
       } else {
-        setMessage("Turn complete.");
+        setMessage("Capture! You took your own stone.");
       }
+      
       switchTurn();
     } else {
       setMessage("Turn complete.");
