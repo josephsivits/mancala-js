@@ -89,10 +89,6 @@ body {
   gap: 10px;
 }
 
-.pit-row-top {
-  direction: rtl;
-}
-
 .pit {
   border: 2px solid #1e90ff;
   background: #f5faff;

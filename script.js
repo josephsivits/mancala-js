@@ -37,7 +37,8 @@
     topRow.innerHTML = "";
     bottomRow.innerHTML = "";
 
-    // Top row shows blue pits right-to-left visually; we create in reverse so CSS rtl keeps numbers aligned.
+    // Top row shows blue pits right-to-left visually, so we add them in reverse order:
+    // leftmost = index 6, ..., rightmost = index 1.
     [...BLUE_PITS].reverse().forEach((idx) => {
       const pit = createPitElement(idx, "blue");
       topRow.appendChild(pit);
