@@ -182,6 +182,16 @@ body {
   border-color: #82b1ff !important; /* Lighter blue border visual */
 }
 
+.text-red {
+  color: #ef5350;
+  font-weight: 700;
+}
+
+.text-blue {
+  color: #1e90ff;
+  font-weight: 700;
+}
+
 .controls {
   margin-top: 18px;
   display: flex;

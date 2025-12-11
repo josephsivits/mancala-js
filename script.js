@@ -31,7 +31,7 @@
     state.gameOver = false;
     buildPits();
     render();
-    setMessage("Red starts. Pick a pit and confirm.");
+    setMessage(`<span class="text-red">Red</span> starts. Pick a pit and confirm.`);
   }
 
   function buildPits() {
@@ -123,9 +123,13 @@
       highlightElements([index, opposite, ownStore], state.currentPlayer);
 
       if (captured > 0) {
-        setMessage("Capture! Stones moved to your store.");
+        const storeName = state.currentPlayer === "red" ? "Red Store" : "Blue Store";
+        const colorClass = state.currentPlayer === "red" ? "text-red" : "text-blue";
+        setMessage(`Capture! Moved to <span class="${colorClass}">${storeName}</span>.`);
       } else {
-        setMessage("Capture! You took your own stone.");
+        const storeName = state.currentPlayer === "red" ? "Red Store" : "Blue Store";
+        const colorClass = state.currentPlayer === "red" ? "text-red" : "text-blue";
+        setMessage(`Capture! Self-capture moved to <span class="${colorClass}">${storeName}</span>.`);
       }
       
       switchTurn();
@@ -244,14 +248,14 @@
     if (redScore === blueScore) {
       setMessage(`Game over. It's a tie (${redScore}-${blueScore}).`);
     } else if (redScore > blueScore) {
-      setMessage(`Game over. Red wins ${redScore}-${blueScore}.`);
+      setMessage(`Game over. <span class="text-red">Red</span> wins ${redScore}-${blueScore}.`);
     } else {
-      setMessage(`Game over. Blue wins ${blueScore}-${redScore}.`);
+      setMessage(`Game over. <span class="text-blue">Blue</span> wins ${blueScore}-${redScore}.`);
     }
   }
 
-  function setMessage(text) {
-    messageEl.textContent = text;
+  function setMessage(html) {
+    messageEl.innerHTML = html;
   }
 
   confirmBtn.addEventListener("click", confirmMove);
