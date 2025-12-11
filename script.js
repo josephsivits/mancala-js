@@ -122,15 +122,11 @@
       
       highlightElements([index, opposite, ownStore], state.currentPlayer);
 
-      if (captured > 0) {
-        const storeName = state.currentPlayer === "red" ? "Red Store" : "Blue Store";
-        const colorClass = state.currentPlayer === "red" ? "text-red" : "text-blue";
-        setMessage(`Capture! Moved to <span class="${colorClass}">${storeName}</span>.`);
-      } else {
-        const storeName = state.currentPlayer === "red" ? "Red Store" : "Blue Store";
-        const colorClass = state.currentPlayer === "red" ? "text-red" : "text-blue";
-        setMessage(`Capture! Self-capture moved to <span class="${colorClass}">${storeName}</span>.`);
-      }
+      const totalCaptured = captured + 1;
+      const stoneLabel = totalCaptured === 1 ? "Stone" : "Stones";
+      const storeName = state.currentPlayer === "red" ? "Red Store" : "Blue Store";
+      const colorClass = state.currentPlayer === "red" ? "text-red" : "text-blue";
+      setMessage(`Capture! Moved <b>${totalCaptured} ${stoneLabel}</b> to <span class="${colorClass}">${storeName}</span>!`);
       
       switchTurn();
     } else {
@@ -159,7 +155,7 @@
         // Force reflow
         void el.offsetWidth; 
         el.classList.add(className);
-        setTimeout(() => el.classList.remove(className), 750);
+        setTimeout(() => el.classList.remove(className), 1500);
       }
     });
   }
