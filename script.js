@@ -92,16 +92,22 @@
     state.pits[startIndex] = 0;
     let index = startIndex;
     const opponentStore = getOpponentStore(state.currentPlayer);
+    const ownStore = getStore(state.currentPlayer);
 
     while (stones > 0) {
       index = (index + 1) % 14;
       if (index === opponentStore) continue;
       state.pits[index] += 1;
       stones -= 1;
+      
+      if (index === ownStore) {
+         highlightElements([ownStore], state.currentPlayer);
+      }
     }
 
-    const ownStore = getStore(state.currentPlayer);
+    // const ownStore = getStore(state.currentPlayer); // Removed duplicate declaration
     if (index === ownStore) {
+      highlightElements([ownStore], state.currentPlayer);
       setMessage("Free turn! Go again.");
     } else if (isPlayersPit(index, state.currentPlayer) && state.pits[index] === 1) {
       // Opposite index for 0-5 (Red) vs 7-12 (Blue) mapping: sum is 12 (0+12, 5+7).
@@ -114,6 +120,8 @@
       state.pits[index] = 0;
       state.pits[opposite] = 0;
       
+      highlightElements([index, opposite, ownStore], state.currentPlayer);
+
       if (captured > 0) {
         setMessage("Capture! Stones moved to your store.");
       } else {
@@ -127,6 +135,29 @@
     }
 
     checkGameEnd();
+  }
+
+  function highlightElements(indices, player) {
+    const className = player === "red" ? "glow-red" : "glow-blue";
+    indices.forEach((idx) => {
+      let el;
+      if (idx === RED_STORE) {
+        el = document.querySelector(".store-red");
+      } else if (idx === BLUE_STORE) {
+        el = document.querySelector(".store-blue");
+      } else {
+        el = document.querySelector(`.pit[data-index="${idx}"]`);
+      }
+
+      if (el) {
+        // Remove class first to restart animation if already running
+        el.classList.remove(className);
+        // Force reflow
+        void el.offsetWidth; 
+        el.classList.add(className);
+        setTimeout(() => el.classList.remove(className), 750);
+      }
+    });
   }
 
   function switchTurn() {

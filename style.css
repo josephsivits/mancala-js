@@ -156,6 +156,32 @@ body {
   box-shadow: 0 0 0 3px rgba(31, 141, 98, 0.25);
 }
 
+@keyframes glow-red-anim {
+  0% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(239, 83, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0); }
+}
+
+@keyframes glow-blue-anim {
+  0% { box-shadow: 0 0 0 0 rgba(30, 144, 255, 0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(30, 144, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(30, 144, 255, 0); }
+}
+
+.glow-red {
+  animation: glow-red-anim 0.75s ease-out forwards;
+  position: relative;
+  z-index: 10;
+  border-color: #ff8a80 !important; /* Lighter red border visual */
+}
+
+.glow-blue {
+  animation: glow-blue-anim 0.75s ease-out forwards;
+  position: relative;
+  z-index: 10;
+  border-color: #82b1ff !important; /* Lighter blue border visual */
+}
+
 .controls {
   margin-top: 18px;
   display: flex;
