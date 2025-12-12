@@ -22,6 +22,37 @@
     animating: false,
   };
 
+  // Audio context for sound effects
+  let audioContext = null;
+  function initAudio() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  function playC3Note() {
+    if (!audioContext) initAudio();
+    
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    // C3 frequency is approximately 130.81 Hz
+    oscillator.frequency.value = 130.81;
+    oscillator.type = "sine"; // Piano-like tone
+    
+    // Envelope for natural piano sound (quick attack, short decay)
+    const now = audioContext.currentTime;
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.3, now + 0.01); // Quick attack
+    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15); // Decay
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start(now);
+    oscillator.stop(now + 0.15); // Short duration
+  }
+
   function initGame() {
     state.animating = false;
     state.pits = new Array(14).fill(0);
@@ -75,6 +106,8 @@
       setMessage("That pit is empty.");
       return;
     }
+    // Initialize audio on first user interaction (required by browsers)
+    initAudio();
     state.selectedPit = index;
     renderSelection();
     setMessage("Confirm to sow stones.");
@@ -120,6 +153,7 @@
 
       showRunnerAtIndex(index);
       updateIndexText(index);
+      playC3Note(); // Play C3 piano note for each stone drop
 
       // Pulse store whenever a point is rendered there
       if (index === ownStore) {
