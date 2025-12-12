@@ -24,20 +24,41 @@
 
   // Audio context for sound effects
   let audioContext = null;
+  let currentNoteIndex = 0; // Tracks which note to play during a move (resets each move)
+  
+  // Musical scale frequencies: C3, D3, E3, F3, G3, A3, B3, C4, D4, E4...
+  const NOTE_FREQUENCIES = [
+    130.81, // C3
+    146.83, // D3
+    164.81, // E3
+    174.61, // F3
+    196.00, // G3
+    220.00, // A3
+    246.94, // B3
+    261.63, // C4
+    293.66, // D4
+    329.63, // E4
+    349.23, // F4
+    392.00, // G4
+    440.00, // A4
+    493.88, // B4
+  ];
+  
   function initAudio() {
     if (!audioContext) {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
   }
 
-  function playC3Note() {
+  function playNote() {
     if (!audioContext) initAudio();
     
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
     
-    // C3 frequency is approximately 130.81 Hz
-    oscillator.frequency.value = 130.81;
+    // Get frequency for current note index (wraps around if needed)
+    const frequency = NOTE_FREQUENCIES[currentNoteIndex % NOTE_FREQUENCIES.length];
+    oscillator.frequency.value = frequency;
     oscillator.type = "sine"; // Piano-like tone
     
     // Envelope for natural piano sound (quick attack, short decay)
@@ -51,6 +72,9 @@
     
     oscillator.start(now);
     oscillator.stop(now + 0.15); // Short duration
+    
+    // Move to next note for next stone
+    currentNoteIndex++;
   }
 
   function initGame() {
@@ -131,6 +155,9 @@
     clearRunner();
     render(); // disables inputs while we animate
 
+    // Reset note index to C3 at the start of each move
+    currentNoteIndex = 0;
+
     const movingPlayer = state.currentPlayer;
     const opponentStore = getOpponentStore(movingPlayer);
     const ownStore = getStore(movingPlayer);
@@ -153,7 +180,7 @@
 
       showRunnerAtIndex(index);
       updateIndexText(index);
-      playC3Note(); // Play C3 piano note for each stone drop
+      playNote(); // Play ascending note (C3, D3, E3...) for each stone drop
 
       // Pulse store whenever a point is rendered there
       if (index === ownStore) {
