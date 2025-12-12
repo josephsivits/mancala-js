@@ -19,9 +19,11 @@
     currentPlayer: "red",
     selectedPit: null,
     gameOver: false,
+    animating: false,
   };
 
   function initGame() {
+    state.animating = false;
     state.pits = new Array(14).fill(0);
     BLUE_PITS.concat(RED_PITS).forEach((idx) => {
       state.pits[idx] = INITIAL_SEEDS_PER_PIT;
@@ -29,6 +31,7 @@
     state.currentPlayer = "red";
     state.selectedPit = null;
     state.gameOver = false;
+    clearRunner();
     buildPits();
     render();
     setMessage(`<span class="text-red">Red</span> starts. Pick a pit and confirm.`);
@@ -63,6 +66,7 @@
 
   function handlePitClick(index) {
     if (state.gameOver) return;
+    if (state.animating) return;
     if (!isPlayersPit(index, state.currentPlayer)) {
       setMessage("Select one of your pits.");
       return;
@@ -78,63 +82,134 @@
 
   function confirmMove() {
     if (state.gameOver) return;
+    if (state.animating) return;
     if (state.selectedPit === null) {
       setMessage("Pick a pit first.");
       return;
     }
-    performMove(state.selectedPit);
+    const startIndex = state.selectedPit;
     state.selectedPit = null;
-    render();
+    renderSelection();
+    animateMove(startIndex);
   }
 
-  function performMove(startIndex) {
+  async function animateMove(startIndex) {
+    state.animating = true;
+    clearRunner();
+    render(); // disables inputs while we animate
+
+    const movingPlayer = state.currentPlayer;
+    const opponentStore = getOpponentStore(movingPlayer);
+    const ownStore = getStore(movingPlayer);
+
     let stones = state.pits[startIndex];
     state.pits[startIndex] = 0;
-    let index = startIndex;
-    const opponentStore = getOpponentStore(state.currentPlayer);
-    const ownStore = getStore(state.currentPlayer);
+    updatePitText(startIndex);
 
+    // Show runner briefly where stones were picked up
+    showRunnerAtIndex(startIndex);
+    await sleep(140);
+
+    let index = startIndex;
     while (stones > 0) {
       index = (index + 1) % 14;
       if (index === opponentStore) continue;
+
       state.pits[index] += 1;
       stones -= 1;
-      
+
+      showRunnerAtIndex(index);
+      updateIndexText(index);
+
+      // Pulse store whenever a point is rendered there
       if (index === ownStore) {
-         highlightElements([ownStore], state.currentPlayer);
+        highlightElements([ownStore], movingPlayer);
       }
+
+      await sleep(180);
     }
 
-    // const ownStore = getStore(state.currentPlayer); // Removed duplicate declaration
-    if (index === ownStore) {
-      highlightElements([ownStore], state.currentPlayer);
+    await resolveAfterLastDrop({ movingPlayer, lastIndex: index, ownStore });
+
+    clearRunner();
+    state.animating = false;
+    render();
+  }
+
+  async function resolveAfterLastDrop({ movingPlayer, lastIndex, ownStore }) {
+    if (lastIndex === ownStore) {
+      highlightElements([ownStore], movingPlayer);
       setMessage("Free turn! Go again.");
-    } else if (isPlayersPit(index, state.currentPlayer) && state.pits[index] === 1) {
-      // Opposite index for 0-5 (Red) vs 7-12 (Blue) mapping: sum is 12 (0+12, 5+7).
-      const opposite = 12 - index;
+      // currentPlayer stays the same
+      checkGameEnd();
+      return;
+    }
+
+    // Capture rule: last stone lands in an empty pit on your side (now has exactly 1).
+    if (isPlayersPit(lastIndex, movingPlayer) && state.pits[lastIndex] === 1) {
+      const opposite = 12 - lastIndex;
       const captured = state.pits[opposite];
-      
-      // Capture Rule: If last stone lands in empty pit on your side,
-      // take that stone + any opponent stones (even if 0) to your store.
+
       state.pits[ownStore] += captured + 1;
-      state.pits[index] = 0;
+      state.pits[lastIndex] = 0;
       state.pits[opposite] = 0;
-      
-      highlightElements([index, opposite, ownStore], state.currentPlayer);
+
+      updateIndexText(ownStore);
+      updatePitText(lastIndex);
+      updatePitText(opposite);
+
+      highlightElements([lastIndex, opposite, ownStore], movingPlayer);
 
       const totalCaptured = captured + 1;
       const stoneLabel = totalCaptured === 1 ? "Stone" : "Stones";
-      const storeName = state.currentPlayer === "red" ? "Red Store" : "Blue Store";
-      const colorClass = state.currentPlayer === "red" ? "text-red" : "text-blue";
-      setMessage(`Capture! Moved <b>${totalCaptured} ${stoneLabel}</b> to <span class="${colorClass}">${storeName}</span>!`);
-      
+      const storeName = movingPlayer === "red" ? "Red Store" : "Blue Store";
+      const colorClass = movingPlayer === "red" ? "text-red" : "text-blue";
+      setMessage(
+        `Capture! Moved <b>${totalCaptured} ${stoneLabel}</b> to <span class="${colorClass}">${storeName}</span>!`,
+      );
+
       switchTurn();
-    } else {
-      setMessage("Turn complete.");
-      switchTurn();
+      checkGameEnd();
+      return;
     }
 
+    setMessage("Turn complete.");
+    switchTurn();
     checkGameEnd();
+  }
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function getPitEl(idx) {
+    return document.querySelector(`.pit[data-index="${idx}"]`);
+  }
+
+  function updatePitText(idx) {
+    const el = getPitEl(idx);
+    if (el) el.textContent = state.pits[idx];
+  }
+
+  function updateIndexText(idx) {
+    if (idx === BLUE_STORE || idx === RED_STORE) {
+      renderStores();
+      return;
+    }
+    updatePitText(idx);
+  }
+
+  function showRunnerAtIndex(idx) {
+    clearRunner();
+    let el;
+    if (idx === RED_STORE) el = document.querySelector(".store-red");
+    else if (idx === BLUE_STORE) el = document.querySelector(".store-blue");
+    else el = getPitEl(idx);
+    if (el) el.classList.add("runner");
+  }
+
+  function clearRunner() {
+    document.querySelectorAll(".runner").forEach((el) => el.classList.remove("runner"));
   }
 
   function highlightElements(indices, player) {
@@ -181,7 +256,7 @@
     renderPits();
     renderSelection();
     updateTurnIndicator();
-    confirmBtn.disabled = state.selectedPit === null || state.gameOver;
+    confirmBtn.disabled = state.animating || state.selectedPit === null || state.gameOver;
   }
 
   function renderStores() {
@@ -195,7 +270,8 @@
       const idx = Number(pit.dataset.index);
       pit.textContent = state.pits[idx];
 
-      const isDisabled = state.gameOver || !isPlayersPit(idx, state.currentPlayer) || state.pits[idx] === 0;
+      const isDisabled =
+        state.animating || state.gameOver || !isPlayersPit(idx, state.currentPlayer) || state.pits[idx] === 0;
       pit.classList.toggle("disabled", isDisabled);
     });
   }
@@ -207,7 +283,7 @@
       const isSelected = state.selectedPit === idx;
       pit.classList.toggle("selected", isSelected);
     });
-    confirmBtn.disabled = state.selectedPit === null || state.gameOver;
+    confirmBtn.disabled = state.animating || state.selectedPit === null || state.gameOver;
   }
 
   function updateTurnIndicator() {

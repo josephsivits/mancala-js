@@ -156,6 +156,24 @@ body {
   box-shadow: 0 0 0 3px rgba(31, 141, 98, 0.25);
 }
 
+@keyframes runner-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(31, 141, 98, 0.45); }
+  50% { box-shadow: 0 0 0 10px rgba(31, 141, 98, 0.10); }
+  100% { box-shadow: 0 0 0 0 rgba(31, 141, 98, 0); }
+}
+
+.runner {
+  border-color: #1f8d62 !important;
+  box-shadow: 0 0 0 4px rgba(31, 141, 98, 0.35) !important;
+  animation: runner-pulse 0.35s ease-out;
+}
+
+.store.runner {
+  border-color: #1f8d62 !important;
+  box-shadow: 0 0 0 5px rgba(31, 141, 98, 0.30) !important;
+  animation: runner-pulse 0.35s ease-out;
+}
+
 @keyframes glow-red-anim {
   0% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.6); }
   50% { box-shadow: 0 0 0 12px rgba(239, 83, 80, 0); }
