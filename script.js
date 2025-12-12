@@ -77,6 +77,40 @@
     currentNoteIndex++;
   }
 
+  async function playPowerChord() {
+    if (!audioContext) initAudio();
+    
+    // Power chord: C3 (130.81), G3 (196.00), C4 (261.63)
+    const frequencies = [130.81, 196.00, 261.63];
+    const eighthNoteDuration = 0.25; // Eighth note at ~120 BPM
+    const now = audioContext.currentTime;
+    
+    // Play twice back-to-back (two eighth notes total)
+    for (let i = 0; i < 2; i++) {
+      const startTime = now + (i * eighthNoteDuration);
+      
+      frequencies.forEach((freq) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.frequency.value = freq;
+        oscillator.type = "sine";
+        
+        // Envelope for power chord (quick attack, sustain, quick release)
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.01);
+        gainNode.gain.setValueAtTime(0.3, startTime + eighthNoteDuration - 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + eighthNoteDuration);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + eighthNoteDuration);
+      });
+    }
+  }
+
   function initGame() {
     state.animating = false;
     state.pits = new Array(14).fill(0);
@@ -220,6 +254,7 @@
       updatePitText(opposite);
 
       highlightElements([lastIndex, opposite, ownStore], movingPlayer);
+      playPowerChord(); // Play power chord (C3, G3, C4) twice in eighth notes
 
       const totalCaptured = captured + 1;
       const stoneLabel = totalCaptured === 1 ? "Stone" : "Stones";
