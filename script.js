@@ -111,6 +111,42 @@
     }
   }
 
+  async function playFreeTurnChord() {
+    if (!audioContext) initAudio();
+    
+    // Free turn chord: A3, C♯4, E4, G4, B♭4
+    const frequencies = [
+      220.00,  // A3
+      277.18,  // C♯4
+      329.63,  // E4
+      392.00,  // G4
+      466.16   // B♭4
+    ];
+    const quarterNoteDuration = 0.5; // Quarter note (fourth note) at ~120 BPM
+    const now = audioContext.currentTime;
+    
+    // Play all notes simultaneously for one quarter note
+    frequencies.forEach((freq) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.frequency.value = freq;
+      oscillator.type = "sine";
+      
+      // Envelope for chord (quick attack, sustain, release)
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.25, now + 0.01);
+      gainNode.gain.setValueAtTime(0.25, now + quarterNoteDuration - 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, now + quarterNoteDuration);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.start(now);
+      oscillator.stop(now + quarterNoteDuration);
+    });
+  }
+
   function initGame() {
     state.animating = false;
     state.pits = new Array(14).fill(0);
@@ -234,6 +270,7 @@
   async function resolveAfterLastDrop({ movingPlayer, lastIndex, ownStore }) {
     if (lastIndex === ownStore) {
       highlightElements([ownStore], movingPlayer);
+      playFreeTurnChord(); // Play free turn chord (A3, C♯4, E4, G4, B♭4) on one quarter note
       setMessage("Free turn! Go again.");
       // currentPlayer stays the same
       checkGameEnd();
